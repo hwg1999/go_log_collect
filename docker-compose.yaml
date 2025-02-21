@@ -40,3 +40,14 @@ services:
       - app-kafka
     depends_on:
       - kafka  # 确保 Kafka 容器启动后再启动 Kafka UI
+      
+  etcd:
+    container_name: etcd
+    image: bitnami/etcd:3
+    restart: always
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+    ports: 
+    - 127.0.0.1:2379:2379
+    networks: 
+      - app-kafka
