@@ -1,0 +1,42 @@
+networks:
+  app-kafka:
+    driver: bridge
+
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: zookeeper:3.4.14
+    restart: always
+    networks:
+      - app-kafka
+
+  kafka:
+    container_name: kafka
+    image: bitnami/kafka:2.4.0
+    restart: always
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      # 后面三条是暴露给外网使用
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+    ports:
+      - 127.0.0.1:9092:9092  # 外部访问 Kafka 的端口
+      - 127.0.0.1:29092:29092  # 用于容器内部的访问
+    networks:
+      - app-kafka
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    restart: always
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092  # 连接到 Kafka 容器
+    ports:
+      - 8080:8080  # 外部访问 Kafka UI 的端口
+    networks:
+      - app-kafka
+    depends_on:
+      - kafka  # 确保 Kafka 容器启动后再启动 Kafka UI
