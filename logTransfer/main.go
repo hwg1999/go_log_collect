@@ -22,7 +22,7 @@ func main() {
 	fmt.Println("load config success")
 
 	// 2.初始化es连接
-	err = es.Init(cfg.EsConf.Address)
+	err = es.Init(cfg.EsConf.Address, cfg.EsConf.MaxChanSize, cfg.EsConf.Nums)
 	if err != nil {
 		fmt.Printf("init es failed, err:%v\n", err)
 		return
