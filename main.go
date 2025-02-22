@@ -6,6 +6,7 @@ import (
 	"logAgent/etcd"
 	"logAgent/kafka"
 	"logAgent/taillog"
+	"logAgent/utils"
 	"sync"
 	"time"
 
@@ -41,8 +42,15 @@ func main() {
 	}
 	fmt.Println("init etcd success.")
 
+	// 为了实现每个logagent都拉取自己独有的配置，所以要以自己的IP地址作为区分
+	ipStr, err := utils.GetOutboundIP(cfg.CenterConf.Address)
+	if err != nil {
+		panic(err)
+	}
+	etcdConfKey := fmt.Sprintf("%s_%s", cfg.EtcdConf.Key, ipStr)
+
 	// 2.1 从etcd中获取日志收集项的配置信息
-	logEntryConf, err := etcd.GetConf(cfg.EtcdConf.Key)
+	logEntryConf, err := etcd.GetConf(etcdConfKey)
 	if err != nil {
 		fmt.Printf("get conf from etcd failed,err:%v\n", err)
 		return
@@ -57,6 +65,6 @@ func main() {
 	// 因为NewConfChan访问了tskMgr的newConfChan, 这个channel是在taillog.Init(logEntryConf) 执行的初始化
 	newConfChan := taillog.NewConfChan()
 	wg.Add(1)
-	go etcd.WatchConf(cfg.EtcdConf.Key, newConfChan)
+	go etcd.WatchConf(etcdConfKey, newConfChan)
 	wg.Wait()
 }
