@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"logAgent/conf"
-	"logAgent/etcd"
-	"logAgent/kafka"
-	"logAgent/taillog"
-	"logAgent/utils"
+	"logCollect/logAgent/conf"
+	"logCollect/logAgent/etcd"
+	"logCollect/logAgent/kafka"
+	"logCollect/logAgent/taillog"
+	"logCollect/logAgent/utils"
 	"sync"
 	"time"
 
@@ -42,12 +42,12 @@ func main() {
 	}
 	fmt.Println("init etcd success.")
 
-	// 为了实现每个logagent都拉取自己独有的配置，所以要以自己的IP地址作为区分
+	// 为了实现每个logAgent都拉取自己独有的配置，所以要以自己的IP地址作为区分
 	ipStr, err := utils.GetOutboundIP(cfg.CenterConf.Address)
 	if err != nil {
 		panic(err)
 	}
-	etcdConfKey := fmt.Sprintf("%s_%s", cfg.EtcdConf.Key, ipStr)
+	etcdConfKey := fmt.Sprintf(cfg.EtcdConf.Key, ipStr)
 
 	// 2.1 从etcd中获取日志收集项的配置信息
 	logEntryConf, err := etcd.GetConf(etcdConfKey)

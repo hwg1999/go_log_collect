@@ -22,8 +22,8 @@ services:
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
     ports:
-      - 127.0.0.1:9092:9092  # 外部访问 Kafka 的端口
-      - 127.0.0.1:29092:29092  # 用于容器内部的访问
+      - 127.0.0.1:9092:9092
+      - 127.0.0.1:29092:29092 # 外网使用29092进行访问
     networks:
       - app-kafka
 
@@ -51,3 +51,27 @@ services:
     - 127.0.0.1:2379:2379
     networks: 
       - app-kafka
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.1
+    environment:
+      - node.name=elasticsearch
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - app-kafka
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.9.1
+    container_name: kibana
+    ports:
+      - 5601:5601
+    networks:
+      - app-kafka
+    depends_on:
+      - elasticsearch

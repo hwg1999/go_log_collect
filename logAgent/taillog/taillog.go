@@ -3,7 +3,7 @@ package taillog
 import (
 	"context"
 	"fmt"
-	"logAgent/kafka"
+	"logCollect/logAgent/kafka"
 
 	"github.com/hpcloud/tail"
 )
@@ -57,9 +57,11 @@ func (t *TailTask) run() {
 			return
 		case line := <-t.instance.Lines: // 从tailObj的通道中一行一行的读取日志数据
 			// 先把日志数据发到一个通道中
-			fmt.Printf("get log data from %s success, log:%v\n", t.path, line.Text)
-			kafka.SendToChan(t.topic, line.Text)
-			// kafka那个包中有单独的goroutine去取日志数据发到kafka
+			if line != nil {
+				fmt.Printf("get log data from %s success, log:%v\n", t.path, line.Text)
+				kafka.SendToChan(t.topic, line.Text)
+				// kafka那个包中有单独的goroutine去取日志数据发到kafka
+			}
 		}
 	}
 }

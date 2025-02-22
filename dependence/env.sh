@@ -16,7 +16,7 @@ start() {
 }
 
 stop() {
-    for container in zookeeper kafka etcd kafka-ui; do
+    for container in zookeeper kafka etcd kafka-ui elasticsearch kibana; do
         docker stop $container
         docker rm $container
     done
