@@ -6,12 +6,16 @@ import (
 	"logAgent/etcd"
 	"logAgent/kafka"
 	"logAgent/taillog"
+	"sync"
 	"time"
 
 	"gopkg.in/ini.v1"
 )
 
-var cfg = new(conf.AppConf)
+var (
+	cfg = new(conf.AppConf)
+	wg  sync.WaitGroup
+)
 
 func main() {
 	// 0.加载配置文件
@@ -50,4 +54,9 @@ func main() {
 
 	// 3. 收集日志发往Kafka
 	taillog.Init(logEntryConf)
+	// 因为NewConfChan访问了tskMgr的newConfChan, 这个channel是在taillog.Init(logEntryConf) 执行的初始化
+	newConfChan := taillog.NewConfChan()
+	wg.Add(1)
+	go etcd.WatchConf(cfg.EtcdConf.Key, newConfChan)
+	wg.Wait()
 }
