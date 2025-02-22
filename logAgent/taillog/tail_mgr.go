@@ -3,6 +3,7 @@ package taillog
 import (
 	"fmt"
 	"logCollect/logAgent/etcd"
+	"logCollect/logAgent/logger"
 	"time"
 )
 
@@ -71,7 +72,7 @@ func (t *tailLogMgr) run() {
 				}
 			}
 
-			fmt.Println("新的配置来了！", newConf)
+			logger.Log.Debug("新的配置来了！", newConf)
 		default:
 			time.Sleep(time.Second)
 		}
